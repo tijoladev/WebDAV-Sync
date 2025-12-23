@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebDAV-Sync – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 16v-4'/><path d='M12 8h.01'/></svg>">
+  <style>
+    :root {
+      /* Palette Slate */
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --bg-input: #020617;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent: #10b981; /* Emerald 500 */
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --accent-hover: #059669;
+      
+      --warn: #f59e0b;
+      --error: #ef4444;
+      --success: #10b981;
+      
+      --border: #334155;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      
+      --font-main: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    /* Layout */
+    .app-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-height: 100vh;
+    }
+
+    /* Typography helpers */
+    h1, h2, h3 { margin: 0; font-weight: 600; }
+    .text-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 12px; }
+    .text-muted { color: var(--text-muted); }
+    .text-accent { color: var(--accent); }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    
+    /* Header / Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      position: sticky;
+      top: 20px;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: rgba(0,0,0,0.2);
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      box-shadow: 0 0 0 0 rgba(255,255,255,0);
+      transition: all 0.3s ease;
+    }
+    .status-dot.active { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+    .status-dot.paused { background: var(--warn); }
+    .status-dot.error { background: var(--error); }
+    .status-dot.idle { background: var(--text-dim); }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    button.btn {
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    button.btn:hover:not(:disabled) {
+      background: var(--border);
+      border-color: var(--text-muted);
+    }
+    button.btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    button.btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    button.btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+    button.btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Grid Layouts */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Stats Cards */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat-label { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+    .stat-value { font-size: 18px; font-weight: 600; font-family: var(--font-mono); }
+
+    /* Progress Bars */
+    .progress-track {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      background: linear-gradient(90deg, var(--accent), #34d399);
+      border-radius: 99px;
+      transition: width 0.3s linear;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    
+    /* Main Progress Hero */
+    .hero-progress {
+      text-align: center;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-progress::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.3;
+    }
+    .big-pct {
+      font-size: 48px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      letter-spacing: -2px;
+      margin-bottom: 4px;
+    }
+
+    /* Transfer List */
+    .transfer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .transfer-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .transfer-item:hover { border-color: var(--text-muted); }
+    
+    .t-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .t-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+    .t-meta { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+    
+    .t-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    /* Logs Terminal */
+    .terminal {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 16px;
+    }
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-viewport {
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #a3a3a3;
+    }
+    
+    /* Log Colors */
+    .log-line { display: block; margin-bottom: 2px; }
+    .log-error { color: var(--error); }
+    .log-warn { color: var(--warn); }
+    .log-info { color: var(--text-muted); }
+    .log-banner { color: var(--accent); font-weight: bold; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card);
+      border: 1px solid var(--accent);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -10px rgba(0,0,0,0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    
+    /* Storage Pill */
+    .storage-pill {
+      background: var(--bg-input);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .storage-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  
+  <div id="toast" class="toast"></div>
+
+  <div class="app-shell">
+    
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="brand">
+        <div class="status-badge">
+          <div id="statusDot" class="status-dot idle"></div>
+          <span id="statusText">Initialisation...</span>
+        </div>
+        <h1 style="font-size:18px;">WebDAV-Sync</h1>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" data-action="start">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Start
+        </button>
+        <button class="btn" data-action="pause">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          Pause
+        </button>
+        <button class="btn" data-action="stop">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+          Stop
+        </button>
+      </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="card hero-progress">
+      <div class="big-pct" id="globalPct">--%</div>
+      <div class="progress-track" style="height: 12px; margin: 16px 0;">
+        <div id="globalBar" class="progress-bar" style="width: 0%"></div>
+      </div>
+      <div style="display: flex; justify-content: center; gap: 24px; color: var(--text-muted); font-size: 13px;">
+        <span>Restant: <strong class="text-mono text-main" id="globalEta">--</strong></span>
+        <span>Extrait: <strong class="text-mono text-main" id="globalExtracted">--</strong></span>
+      </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <div class="stat-cards">
+      <div class="stat-card">
+        <span class="stat-label">Vitesse Actuelle</span>
+        <span class="stat-value text-accent" id="globalSpeed">--/s</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Déjà Transféré</span>
+        <span class="stat-value" id="globalBytes">--</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Taille Totale</span>
+        <span class="stat-value" id="globalTotal">--</span>
+      </div>
+    </div>
+
+    <!-- Main Content Split -->
+    <div class="dashboard-grid">
+      
+      <!-- Left: Active Transfers -->
+      <section class="card">
+        <h2 style="font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Transferts en cours
+        </h2>
+        <div id="transfers" class="transfer-list">
+          <div class="text-muted text-sm" style="text-align: center; padding: 20px;">En attente de données...</div>
+        </div>
+      </section>
+
+      <!-- Right: Info Details -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Storage -->
+        <section class="card">
+          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);">Stockage</h3>
+          
+          <div class="storage-pill">
+            <div class="storage-header">
+              <span>Remote (WebDAV)</span>
+              <span class="text-mono" id="remoteTxt">-- / --</span>
+            </div>
+            <div class="progress-track"><div id="remoteBar" class="progress-bar" style="width: 0%; background: var(--text-dim);"></div></div>
+          </div>
+          
+          <div class="storage-pill" style="margin-top: 12px;">
+            <div class="storage-header">
+              <span>Local Disk</span>
+              <span class="text-mono" id="localTxt">-- free</span>
+            </div>
+            <div class="progress-track"><div id="localBar" class="progress-bar" style="width: 0%; background: var(--text-dim);"></div></div>
+            <div class="text-xs text-muted" style="text-align: right; margin-top: 4px;" id="localDisk">Total: --</div>
+          </div>
+        </section>
+
+        <!-- Last Run Info -->
+        <section class="card">
+          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);">Dernier Lancement</h3>
+          <div id="lastRun" style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;"></div>
+        </section>
+
+        <!-- Rclone Version -->
+        <section class="card" style="padding: 16px;">
+          <div id="rcloneInfo" class="text-xs text-muted font-mono"></div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Logs Section -->
+    <section class="terminal">
+      <div class="terminal-header">
+        <h3 style="font-size: 14px; color: var(--text-muted);">Logs Système</h3>
+        <div class="controls">
+          <select id="logsDate" style="background:#000; color:var(--text-muted); border:1px solid var(--border); border-radius:4px; font-size:12px; padding:4px;">
+            <option value="today">Aujourd'hui</option>
+          </select>
+          <button id="logsRefresh" class="btn" style="padding: 4px 8px; font-size: 12px; height: auto;">↻</button>
+          <button id="logsDownload" class="btn" style="padding: 4px 8px; font-size: 12px; height: auto;">⬇</button>
+        </div>
+      </div>
+      <div class="text-xs text-muted" id="logsMeta" style="margin-bottom: 8px;"></div>
+      <div id="logsContent" class="log-viewport"></div>
+    </section>
+    
+    <footer style="text-align: center; color: var(--text-dim); font-size: 12px; margin-top: 20px;">
+       <button id="refreshBtn" class="btn" style="font-size: 12px;">Forcer l'actualisation</button>
+       <p style="margin-top: 12px;">Live: 4s • Snapshot: 30s</p>
+    </footer>
+
+  </div>
+
+<!-- SCRIPTS -->
+<script>
+  // --- Utils ---
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const nowMs=()=>performance.now();
+  const fmtBytes=b=>{
+    if(b==null) return '–';
+    const u=['o','Ko','Mo','Go','To'];
+    let i=0,x=b;
+    while(x>=1024 && i<u.length-1){x/=1024;i++;}
+    return `${x.toFixed(x>=100?0:x>=10?1:2)} ${u[i]}`;
+  };
+  const fmtRate=bps=> bps>0? `${fmtBytes(bps)}/s` : '–';
+  const fmtDur=secs=>{
+    if(!isFinite(secs)||secs<0) return '—';
+    const s=Math.round(secs);
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+    return h>0? `${h}h${String(m).padStart(2,'0')}m` : `${m}m${String(ss).padStart(2,'0')}s`;
+  };
+
+  // --- Estimations live ---
+  // Identique à l'existant, logique de calcul
+  function estimateGlobal(snapshot){
+    const st=snapshot?.stats||{};
+    const total=Number(st.totalBytes)||0;
+    const snapBytes=Number(st.bytes)||0;
+    const speed= Number(st.speedAvg ?? st.speed) || 0;
+    const extractedAt=new Date(snapshot.extracted_at).getTime();
+    const tNow = Date.now();
+    const dtSec = clamp((tNow - extractedAt)/1000, 0, 24*3600);
+    const estBytes = clamp(snapBytes + speed*dtSec, 0, total||Infinity);
+    const pct = total>0? (estBytes/total)*100 : 0;
+    const remaining = Math.max(0, total - estBytes);
+    const eta = speed>0? remaining/speed : (Number(st.eta)||Infinity);
+    return { estBytes, total, pct, speed, eta, extractedAt, dtSec };
+  }
+
+  function estimateTransfer(xfer, snapshot){
+    const size=Number(xfer.size)||0;
+    const snapBytes=Number(xfer.bytes)||0;
+    const speed= Number(xfer.speedAvg ?? xfer.speed) || 0;
+    const extractedAt=new Date(snapshot.extracted_at).getTime();
+    const tNow = Date.now();
+    const dtSec = clamp((tNow - extractedAt)/1000, 0, 24*3600);
+    const estBytes = clamp(snapBytes + speed*dtSec, 0, size||Infinity);
+    const pct = size>0? (estBytes/size)*100 : (Number(xfer.percentage)||0);
+    const remaining = Math.max(0, size - estBytes);
+    const eta = speed>0? remaining/speed : (Number(xfer.eta)||Infinity);
+    return { estBytes, size, pct, speed, eta };
+  }
+
+  // --- State ---
+  let snapshot=null;
+  let staticData=null;   // rclone version (chargé 1x)
+  let dynamicData=null;  // disk, last_run (chargé toutes les 30s)
+  let lastFetch=0;
+  const REFRESH_MS=4000;
+  const REFRESH_MS_SLOW=30000;
+  const TICK_MS=50;
+  const SNAPSHOT_MS=30000;  // 30s pour les données dynamiques
+
+  // --- DOM refs ---
+  const statusDot=document.getElementById('statusDot');
+  const statusText=document.getElementById('statusText');
+  const globalBar=document.getElementById('globalBar');
+  const globalPct=document.getElementById('globalPct');
+  const globalBytesEl=document.getElementById('globalBytes');
+  const globalTotalEl=document.getElementById('globalTotal');
+  const globalSpeedEl=document.getElementById('globalSpeed');
+  const globalEtaEl=document.getElementById('globalEta');
+  const globalExtractedEl=document.getElementById('globalExtracted');
+  const transfersEl=document.getElementById('transfers');
+  const refreshBtn=document.getElementById('refreshBtn');
+
+  // snapshot DOM refs
+  const remoteBar=document.getElementById('remoteBar');
+  const localBar=document.getElementById('localBar');
+  const remoteTxt=document.getElementById('remoteTxt');
+  const localTxt=document.getElementById('localTxt');
+  const localDisk=document.getElementById('localDisk');
+  const rcloneInfo=document.getElementById('rcloneInfo');
+  const lastRun=document.getElementById('lastRun');
+
+  refreshBtn.addEventListener('click', ()=> fetchLive(true));
+
+  // --- Toast ---
+  const toastEl = document.getElementById('toast');
+  let toastTimeout = null;
+  function toast(msg, type='info') {
+    toastEl.innerHTML = (type==='error' ? '⚠️ ' : '✅ ') + msg;
+    toastEl.className = 'toast show';
+    if(type==='error') toastEl.style.borderColor = 'var(--error)';
+    else toastEl.style.borderColor = 'var(--accent)';
+    
+    if(toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastEl.className = 'toast', 3000);
+  }
+
+  // --- Contrôles ---
+  const actionLabels = { start: 'Sync lancée', pause: 'Pause activée', resume: 'Reprise', stop: 'Arrêt envoyé' };
+  async function sendControl(action){
+    try{
+      const url = `/cgi-bin/control.sh?action=${encodeURIComponent(action)}`;
+      const res = await fetch(url, { method: 'POST', cache:'no-store' });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      toast(json.ok ? (actionLabels[action] || 'OK') : `Erreur: ${json.error || json.message || 'inconnue'}`, json.ok?'success':'error');
+      // Utiliser le live data retourné par control pour mise à jour immédiate
+      if(json.live) {
+        snapshot = json.live;
+        lastFetch = nowMs();
+        render();
+      }
+    }catch(err){
+      console.error(`Erreur action ${action}`, err);
+      toast(`Erreur: ${err.message}`, 'error');
+    }
+  }
+
+  // Attach events
+  document.querySelectorAll('button[data-action]').forEach(btn=>{
+    btn.addEventListener('click', ()=> sendControl(btn.dataset.action));
+  });
+
+  // Boutons contrôle refs (pour état)
+  const btnStart = document.querySelector('[data-action="start"]');
+  const btnPause = document.querySelector('[data-action="pause"]');
+  const btnStop = document.querySelector('[data-action="stop"]');
+
+  // --- Rendering live ---
+  function render(){
+    if(!snapshot) return;
+    const g=estimateGlobal(snapshot);
+    
+    // Bar
+    globalBar.style.width = `${clamp(g.pct,0,100)}%`;
+    
+    // Text stats
+    globalPct.textContent = `${g.pct.toFixed(1)}%`;
+    globalBytesEl.textContent = fmtBytes(g.estBytes);
+    globalTotalEl.textContent = fmtBytes(g.total);
+    globalSpeedEl.textContent = fmtRate(g.speed);
+    globalEtaEl.textContent = fmtDur(g.eta);
+    
+    const agoSec = Math.round(g.dtSec);
+    globalExtractedEl.textContent = `${new Date(g.extractedAt).toLocaleTimeString()} (-${agoSec}s)`;
+
+    // État (le serveur renvoie maintenant "paused" directement si bwlimit=0)
+    let st = snapshot.status || 'unknown';
+    const isPaused = st === 'paused';
+
+    // Dot
+    statusDot.className = 'status-dot ' + (st==='active'?'active':st==='paused'?'paused':st==='idle'||st==='inactive'?'idle':'error');
+    statusText.textContent = st.toUpperCase();
+    
+    // Buttons state
+    const isRunning = st === 'active' || st === 'paused';
+    btnStart.disabled = st === 'active';
+    // Change Text Inside Button
+    btnStart.innerHTML = isPaused 
+       ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Reprendre` 
+       : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start`;
+    
+    btnStart.dataset.action = isPaused ? 'resume' : 'start';
+    
+    btnPause.disabled = !isRunning || isPaused;
+    btnStop.disabled = !isRunning;
+
+    // Transfers
+    const list = snapshot?.stats?.transferring || [];
+
+    if (list.length === 0) {
+      if(!transfersEl.querySelector('.text-muted'))
+         transfersEl.innerHTML = '<div class="text-muted text-sm" style="text-align:center;padding:20px">Aucun transfert en cours</div>';
+      return;
+    }
+
+    // Reconstruction propre de la liste
+    transfersEl.replaceChildren(...list.map((x)=>{
+      const est=estimateTransfer(x, snapshot);
+      
+      const el=document.createElement('div');
+      el.className='transfer-item';
+      
+      el.innerHTML = `
+        <div class="t-header">
+           <div class="t-name" title="${x.name}">${x.name}</div>
+           <div class="t-meta">${est.pct.toFixed(1)}%</div>
+        </div>
+        <div class="progress-track" style="height:6px">
+           <div class="progress-bar" style="width: ${clamp(est.pct,0,100)}%"></div>
+        </div>
+        <div class="t-details">
+           <span>${fmtBytes(est.estBytes)} / ${fmtBytes(est.size)}</span>
+           <span>${fmtRate(est.speed)}</span>
+           <span>ETA: ${fmtDur(est.eta)}</span>
+        </div>
+      `;
+      return el;
+    }));
+  }
+
+  // --- Networking live (inchangé) ---
+  async function fetchLive(fromButton=false){
+    try{
+      const res = await fetch('/cgi-bin/live.sh', {cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      snapshot = await res.json();
+      lastFetch=nowMs();
+    }catch(err){
+      console.error('fetchLive error', err);
+      statusDot.className='status-dot error';
+      statusText.textContent='ERREUR CONNEXION';
+    }
+    render();
+  }
+
+  // Chargement unique des données statiques (rclone version)
+  async function fetchStaticSnapshot(){
+    try{
+      const res = await fetch('/cgi-bin/snapshot.sh?type=static',{cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      staticData = await res.json();
+      renderStaticSnapshot();
+    }catch(err){
+      console.error('fetchStaticSnapshot error',err);
+    }
+  }
+
+  // Chargement périodique des données dynamiques (disk, last_run)
+  async function fetchDynamicSnapshot(){
+    try{
+      const res = await fetch('/cgi-bin/snapshot.sh?type=dynamic',{cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      dynamicData = await res.json();
+      renderDynamicSnapshot();
+    }catch(err){
+      console.error('fetchDynamicSnapshot error',err);
+    }
+  }
+
+  function renderStaticSnapshot(){
+    if(!staticData) return;
+
+    // Rclone version info
+    const rc=staticData.rclone||{};
+    let rHtml = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">`;
+    for(const [k,v] of Object.entries(rc)){
+       rHtml += `<div><span style="color:#64748b">${k}:</span> <span style="color:#e2e8f0">${v}</span></div>`;
+    }
+    rHtml += `</div>`;
+    rcloneInfo.innerHTML=rHtml;
+  }
+
+  function renderDynamicSnapshot(){
+    if(!dynamicData) return;
+
+    // Remote disk
+    const rem=dynamicData.remote||{};
+    const remUsed=rem.used||0, remTotal=rem.total||0;
+    const remPct=remTotal>0?(remUsed/remTotal)*100:0;
+    remoteBar.style.width = `${clamp(remPct,0,100)}%`;
+    remoteTxt.textContent=`${fmtBytes(remUsed)} / ${fmtBytes(remTotal)}`;
+
+    // Local disk
+    const loc=dynamicData.local||{};
+    const size=loc.size?.bytes||0;
+    const fs=loc.filesystem||{};
+    const free=fs.free_bytes||0, total=fs.total_bytes||0;
+    const pct=size>0?Math.min(size/(size+free),1)*100:0;
+    localBar.style.width=`${clamp(pct,0,100)}%`;
+    localTxt.textContent=`${fmtBytes(free)} libres`;
+    localDisk.textContent=`Total disque: ${fmtBytes(total)}`;
+
+    // Last Run
+    const lr=dynamicData.last_run||{};
+    const kvs=[
+      ['Début', lr.start_at],
+      ['Fin', lr.end_at],
+      ['Exit Code', lr.exit_code]
+    ];
+    lastRun.innerHTML=kvs.map(([k,v])=>`
+      <div style="display:flex; justify-content:space-between; border-bottom:1px solid #334155; padding-bottom:4px;">
+        <span class="text-muted">${k}</span>
+        <span class="text-mono" style="color:${v==='0'?'var(--accent)':'inherit'}">${v||'-'}</span>
+      </div>
+    `).join('');
+  }
+
+  // --- Logs (inchangé sauf classes CSS) ---
+  const logsDateEl = document.getElementById('logsDate');
+  const logsMetaEl = document.getElementById('logsMeta');
+  const logsContentEl = document.getElementById('logsContent');
+  const logsRefreshBtn = document.getElementById('logsRefresh');
+  const logsDownloadBtn = document.getElementById('logsDownload');
+  let logsRawContent = '';
+
+  function colorizeLogs(text) {
+    if (!text) return '<span class="log-info">(vide)</span>';
+    return text.split('\n').map(line => {
+      let cls = 'log-line';
+      if (line.includes('[ERROR]')) cls += ' log-error';
+      else if (line.includes('[WARN]') || line.includes('WARN')) cls += ' log-warn';
+      else if (line.includes('[INFO]')) cls += ' log-info';
+      else if (line.includes('[DEBUG]')) cls += ' log-info'; // debug en gris
+      else if (line.startsWith('===') || line.startsWith('>>')) cls += ' log-banner';
+      
+      const escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<span class="${cls}">${escaped}</span>`;
+    }).join('\n');
+  }
+
+  async function fetchLogs(date = 'today') {
+    try {
+      const url = `/cgi-bin/logs.sh?lines=100&date=${encodeURIComponent(date)}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      const currentVal = logsDateEl.value;
+      logsDateEl.innerHTML = '<option value="today">Aujourd\'hui</option>';
+      (data.available_dates || []).forEach(d => {
+        if (d !== new Date().toISOString().slice(0, 10)) {
+          logsDateEl.innerHTML += `<option value="${d}">${d}</option>`;
+        }
+      });
+      logsDateEl.value = currentVal;
+
+      logsMetaEl.textContent = `${data.file || '–'} • ${data.total_lines} lignes • ${fmtBytes(data.size_bytes)}`;
+      logsRawContent = data.content || '';
+
+      const wasAtBottom = (logsContentEl.scrollHeight - logsContentEl.scrollTop) <= (logsContentEl.clientHeight + 50);
+      
+      logsContentEl.innerHTML = colorizeLogs(data.content);
+      
+      // Auto scroll si on était en bas
+      if(wasAtBottom) logsContentEl.scrollTop = logsContentEl.scrollHeight;
+      
+    } catch (err) {
+      console.error('fetchLogs error', err);
+      logsContentEl.innerHTML = `<span class="log-error">Erreur: ${err.message}</span>`;
+    }
+  }
+
+  logsDownloadBtn.addEventListener('click', () => {
+    const date = logsDateEl.value === 'today' ? new Date().toISOString().slice(0,10) : logsDateEl.value;
+    const blob = new Blob([logsRawContent], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `webdav-sync-${date}.log`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  logsRefreshBtn.addEventListener('click', () => fetchLogs(logsDateEl.value));
+  logsDateEl.addEventListener('change', () => fetchLogs(logsDateEl.value));
+
+  // --- Timers ---
+  let netTimer=null, tickTimer=null, snapshotTimer=null, logsTimer=null;
+  let isSlowMode=false;
+
+  function startTimers(slow=false){
+    stopTimers();
+    isSlowMode=slow;
+    const refreshMs = slow ? REFRESH_MS_SLOW : REFRESH_MS;
+    netTimer=setInterval(()=>fetchLive(), refreshMs);
+    if(!slow){
+      tickTimer=setInterval(()=>render(), TICK_MS);
+      snapshotTimer=setInterval(()=>fetchDynamicSnapshot(), SNAPSHOT_MS);
+      logsTimer=setInterval(()=>{
+        if(snapshot?.status === 'active') fetchLogs(logsDateEl.value);
+      }, 5000);
+    }
+  }
+  function stopTimers(){
+    [netTimer,tickTimer,snapshotTimer,logsTimer].forEach(t=>{ if(t){clearInterval(t);} });
+    netTimer=tickTimer=snapshotTimer=logsTimer=null;
+  }
+
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){ startTimers(true); }
+    else { fetchLive(); fetchDynamicSnapshot(); fetchLogs(); startTimers(false); }
+  });
+
+  // Init
+  fetchLive();
+  fetchStaticSnapshot();   // 1x au chargement
+  fetchDynamicSnapshot();  // puis toutes les 30s
+  fetchLogs();
+  startTimers();
+</script>
+</body>
+</html>

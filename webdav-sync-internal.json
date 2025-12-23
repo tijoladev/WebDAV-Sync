@@ -1,0 +1,43 @@
+{
+  "TZ":            { "value": null, "default": "Europe/Paris", "type": "string" },
+  "NO_LOG":        { "value": null, "default": false,          "type": "bool"   },
+  "LOG_MAX_DAYS":  { "value": null, "default": 5,              "type": "int"    },
+  "LOG_LEVEL":     { "value": null, "default": "INFO",         "type": "choice", "choices": ["DEBUG", "INFO", "NOTICE", "ERROR"] },
+  "PUID":          { "value": null, "default": 0,              "type": "int"    },
+  "PGID":          { "value": null, "default": 0,              "type": "int"    },
+
+  "CRON_ENABLED":  { "value": null, "default": true,           "type": "bool"   },
+  "CRON_SCHEDULE": { "value": null, "default": "0 5 * * *",    "type": "cron"   },
+
+  "SYNC_OP": {
+    "value": null,
+    "default": "sync",
+    "type": "choice",
+    "choices": ["sync", "copy", "move"],
+    "critical": true
+  },
+  "SYNC_FLAGS": {
+    "value": null,
+    "default": "",
+    "type": "string",
+    "critical": true
+  },
+  "REMOTE_URL": {
+    "value": null,
+    "default": "",
+    "type": "string",
+    "critical": true
+  },
+  "REMOTE_USER": {
+    "value": null,
+    "default": "",
+    "type": "string",
+    "critical": true
+  },
+  "REMOTE_PASS_OBSCURED": {
+    "value": null,
+    "default": "",
+    "type": "string",
+    "critical": true
+  }
+}
