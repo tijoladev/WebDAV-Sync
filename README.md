@@ -8,7 +8,9 @@
 
 Lightweight Docker container for automatic WebDAV to local filesystem synchronization, with real-time web UI. Ideal for homelab, self-hosting and NAS backup. Works with kDrive, Nextcloud, ownCloud, Synology, QNAP, Seafile, pCloud, Box, Yandex Disk and any WebDAV server.
 
-![WebDAV-Sync Dashboard](WebDAV-Sync.png)
+<p align="center">
+  <img src="WebDAV-Sync.png" alt="WebDAV-Sync Dashboard" width="700">
+</p>
 
 ## Compatible WebDAV Services
 
