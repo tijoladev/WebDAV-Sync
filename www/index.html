@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -347,7 +347,7 @@
       <div class="brand">
         <div class="status-badge">
           <div id="statusDot" class="status-dot idle"></div>
-          <span id="statusText">Initialisation...</span>
+          <span id="statusText" data-i18n="init">Initializing...</span>
         </div>
         <h1 style="font-size:18px;">WebDAV-Sync</h1>
       </div>
@@ -355,16 +355,20 @@
       <div class="controls">
         <button class="btn btn-primary" data-action="start">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Start
+          <span data-i18n="start">Start</span>
         </button>
         <button class="btn" data-action="pause">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-          Pause
+          <span data-i18n="pause">Pause</span>
         </button>
         <button class="btn" data-action="stop">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-          Stop
+          <span data-i18n="stop">Stop</span>
         </button>
+        <select id="langSelect" style="background:var(--bg-card-hover); color:var(--text-muted); border:1px solid var(--border); border-radius:6px; padding:6px 8px; font-size:12px; cursor:pointer;">
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+        </select>
       </div>
     </nav>
     
@@ -375,23 +379,23 @@
         <div id="globalBar" class="progress-bar" style="width: 0%"></div>
       </div>
       <div style="display: flex; justify-content: center; gap: 24px; color: var(--text-muted); font-size: 13px;">
-        <span>Restant: <strong class="text-mono text-main" id="globalEta">--</strong></span>
-        <span>Extrait: <strong class="text-mono text-main" id="globalExtracted">--</strong></span>
+        <span><span data-i18n="remaining">Remaining</span>: <strong class="text-mono text-main" id="globalEta">--</strong></span>
+        <span><span data-i18n="extracted">Extracted</span>: <strong class="text-mono text-main" id="globalExtracted">--</strong></span>
       </div>
     </section>
 
     <!-- Stats Grid -->
     <div class="stat-cards">
       <div class="stat-card">
-        <span class="stat-label">Vitesse Actuelle</span>
+        <span class="stat-label" data-i18n="currentSpeed">Current Speed</span>
         <span class="stat-value text-accent" id="globalSpeed">--/s</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Déjà Transféré</span>
+        <span class="stat-label" data-i18n="transferred">Transferred</span>
         <span class="stat-value" id="globalBytes">--</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Taille Totale</span>
+        <span class="stat-label" data-i18n="totalSize">Total Size</span>
         <span class="stat-value" id="globalTotal">--</span>
       </div>
     </div>
@@ -403,10 +407,10 @@
       <section class="card">
         <h2 style="font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Transferts en cours
+          <span data-i18n="activeTransfers">Active transfers</span>
         </h2>
         <div id="transfers" class="transfer-list">
-          <div class="text-muted text-sm" style="text-align: center; padding: 20px;">En attente de données...</div>
+          <div class="text-muted text-sm" style="text-align: center; padding: 20px;" data-i18n="waitingData">Waiting for data...</div>
         </div>
       </section>
 
@@ -415,7 +419,7 @@
         
         <!-- Storage -->
         <section class="card">
-          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);">Stockage</h3>
+          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);" data-i18n="storage">Storage</h3>
           
           <div class="storage-pill">
             <div class="storage-header">
@@ -428,16 +432,16 @@
           <div class="storage-pill" style="margin-top: 12px;">
             <div class="storage-header">
               <span>Local Disk</span>
-              <span class="text-mono" id="localTxt">-- free</span>
+              <span class="text-mono" id="localTxt">--</span>
             </div>
             <div class="progress-track"><div id="localBar" class="progress-bar" style="width: 0%; background: var(--text-dim);"></div></div>
-            <div class="text-xs text-muted" style="text-align: right; margin-top: 4px;" id="localDisk">Total: --</div>
+            <div class="text-xs text-muted" style="text-align: right; margin-top: 4px;" id="localDisk">--</div>
           </div>
         </section>
 
         <!-- Last Run Info -->
         <section class="card">
-          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);">Dernier Lancement</h3>
+          <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-muted);" data-i18n="lastRun">Last Run</h3>
           <div id="lastRun" style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;"></div>
         </section>
 
@@ -452,10 +456,10 @@
     <!-- Logs Section -->
     <section class="terminal">
       <div class="terminal-header">
-        <h3 style="font-size: 14px; color: var(--text-muted);">Logs Système</h3>
+        <h3 style="font-size: 14px; color: var(--text-muted);" data-i18n="systemLogs">System Logs</h3>
         <div class="controls">
           <select id="logsDate" style="background:#000; color:var(--text-muted); border:1px solid var(--border); border-radius:4px; font-size:12px; padding:4px;">
-            <option value="today">Aujourd'hui</option>
+            <option value="today">Today</option>
           </select>
           <button id="logsRefresh" class="btn" style="padding: 4px 8px; font-size: 12px; height: auto;">↻</button>
           <button id="logsDownload" class="btn" style="padding: 4px 8px; font-size: 12px; height: auto;">⬇</button>
@@ -466,20 +470,155 @@
     </section>
     
     <footer style="text-align: center; color: var(--text-dim); font-size: 12px; margin-top: 20px;">
-       <button id="refreshBtn" class="btn" style="font-size: 12px;">Forcer l'actualisation</button>
-       <p style="margin-top: 12px;">Live: 4s • Snapshot: 30s</p>
+       <button id="refreshBtn" class="btn" style="font-size: 12px;" data-i18n="refresh">Force refresh</button>
+       <p style="margin-top: 12px;" data-i18n="footerInfo">Live: 4s • Snapshot: 30s</p>
+       <p style="margin-top: 8px;"><a href="https://github.com/tijoladev/WebDAV-Sync" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">GitHub</a></p>
     </footer>
 
   </div>
 
 <!-- SCRIPTS -->
 <script>
+  // --- i18n ---
+  const i18n = {
+    en: {
+      // Status
+      init: 'Initializing...',
+      idle: 'IDLE',
+      active: 'ACTIVE',
+      paused: 'PAUSED',
+      error: 'ERROR',
+      connectionError: 'CONNECTION ERROR',
+      // Buttons
+      start: 'Start',
+      pause: 'Pause',
+      resume: 'Resume',
+      stop: 'Stop',
+      refresh: 'Force refresh',
+      // Hero section
+      remaining: 'Remaining',
+      extracted: 'Extracted',
+      // Stats
+      currentSpeed: 'Current Speed',
+      transferred: 'Transferred',
+      totalSize: 'Total Size',
+      // Transfers
+      activeTransfers: 'Active transfers',
+      waitingData: 'Waiting for data...',
+      noTransfers: 'No active transfers',
+      // Storage
+      storage: 'Storage',
+      free: 'free',
+      totalDisk: 'Total disk',
+      // Last run
+      lastRun: 'Last Run',
+      startTime: 'Start',
+      endTime: 'End',
+      exitCode: 'Exit Code',
+      // Logs
+      systemLogs: 'System Logs',
+      today: 'Today',
+      lines: 'lines',
+      empty: '(empty)',
+      // Actions feedback
+      syncStarted: 'Sync started',
+      pauseActivated: 'Pause activated',
+      resumed: 'Resumed',
+      stopSent: 'Stop sent',
+      errorLabel: 'Error',
+      // Units
+      units: ['B', 'KB', 'MB', 'GB', 'TB'],
+      // Footer
+      footerInfo: 'Live: 4s • Snapshot: 30s'
+    },
+    fr: {
+      // Status
+      init: 'Initialisation...',
+      idle: 'INACTIF',
+      active: 'ACTIF',
+      paused: 'EN PAUSE',
+      error: 'ERREUR',
+      connectionError: 'ERREUR CONNEXION',
+      // Buttons
+      start: 'Démarrer',
+      pause: 'Pause',
+      resume: 'Reprendre',
+      stop: 'Arrêter',
+      refresh: 'Forcer l\'actualisation',
+      // Hero section
+      remaining: 'Restant',
+      extracted: 'Extrait',
+      // Stats
+      currentSpeed: 'Vitesse Actuelle',
+      transferred: 'Déjà Transféré',
+      totalSize: 'Taille Totale',
+      // Transfers
+      activeTransfers: 'Transferts en cours',
+      waitingData: 'En attente de données...',
+      noTransfers: 'Aucun transfert en cours',
+      // Storage
+      storage: 'Stockage',
+      free: 'libres',
+      totalDisk: 'Total disque',
+      // Last run
+      lastRun: 'Dernier Lancement',
+      startTime: 'Début',
+      endTime: 'Fin',
+      exitCode: 'Exit Code',
+      // Logs
+      systemLogs: 'Logs Système',
+      today: 'Aujourd\'hui',
+      lines: 'lignes',
+      empty: '(vide)',
+      // Actions feedback
+      syncStarted: 'Sync lancée',
+      pauseActivated: 'Pause activée',
+      resumed: 'Reprise',
+      stopSent: 'Arrêt envoyé',
+      errorLabel: 'Erreur',
+      // Units
+      units: ['o', 'Ko', 'Mo', 'Go', 'To'],
+      // Footer
+      footerInfo: 'Live: 4s • Snapshot: 30s'
+    }
+  };
+
+  // Language detection and persistence
+  function detectLang() {
+    const stored = localStorage.getItem('wdsync-lang');
+    if (stored && i18n[stored]) return stored;
+    const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    return i18n[browser] ? browser : 'en';
+  }
+  let lang = detectLang();
+  let t = i18n[lang];
+
+  function setLang(newLang) {
+    if (!i18n[newLang]) return;
+    lang = newLang;
+    t = i18n[lang];
+    localStorage.setItem('wdsync-lang', lang);
+    document.documentElement.lang = lang;
+    applyTranslations();
+    render();
+  }
+
+  function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (t[key]) el.textContent = t[key];
+    });
+    // Update select options
+    const logsDate = document.getElementById('logsDate');
+    if (logsDate && logsDate.options[0]) logsDate.options[0].textContent = t.today;
+  }
+
   // --- Utils ---
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   const nowMs=()=>performance.now();
   const fmtBytes=b=>{
     if(b==null) return '–';
-    const u=['o','Ko','Mo','Go','To'];
+    const u=t.units;
     let i=0,x=b;
     while(x>=1024 && i<u.length-1){x/=1024;i++;}
     return `${x.toFixed(x>=100?0:x>=10?1:2)} ${u[i]}`;
@@ -571,14 +710,17 @@
   }
 
   // --- Contrôles ---
-  const actionLabels = { start: 'Sync lancée', pause: 'Pause activée', resume: 'Reprise', stop: 'Arrêt envoyé' };
+  const getActionLabel = (action) => {
+    const labels = { start: t.syncStarted, pause: t.pauseActivated, resume: t.resumed, stop: t.stopSent };
+    return labels[action] || 'OK';
+  };
   async function sendControl(action){
     try{
       const url = `/cgi-bin/control.sh?action=${encodeURIComponent(action)}`;
       const res = await fetch(url, { method: 'POST', cache:'no-store' });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      toast(json.ok ? (actionLabels[action] || 'OK') : `Erreur: ${json.error || json.message || 'inconnue'}`, json.ok?'success':'error');
+      toast(json.ok ? getActionLabel(action) : `${t.errorLabel}: ${json.error || json.message || 'unknown'}`, json.ok?'success':'error');
       // Utiliser le live data retourné par control pour mise à jour immédiate
       if(json.live) {
         snapshot = json.live;
@@ -625,15 +767,16 @@
 
     // Dot
     statusDot.className = 'status-dot ' + (st==='active'?'active':st==='paused'?'paused':st==='idle'||st==='inactive'?'idle':'error');
-    statusText.textContent = st.toUpperCase();
+    const statusLabels = { idle: t.idle, inactive: t.idle, active: t.active, paused: t.paused, error: t.error };
+    statusText.textContent = statusLabels[st] || st.toUpperCase();
     
     // Buttons state
     const isRunning = st === 'active' || st === 'paused';
     btnStart.disabled = st === 'active';
     // Change Text Inside Button
-    btnStart.innerHTML = isPaused 
-       ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Reprendre` 
-       : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start`;
+    btnStart.innerHTML = isPaused
+       ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>${t.resume}</span>`
+       : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span data-i18n="start">${t.start}</span>`;
     
     btnStart.dataset.action = isPaused ? 'resume' : 'start';
     
@@ -645,7 +788,7 @@
 
     if (list.length === 0) {
       if(!transfersEl.querySelector('.text-muted'))
-         transfersEl.innerHTML = '<div class="text-muted text-sm" style="text-align:center;padding:20px">Aucun transfert en cours</div>';
+         transfersEl.innerHTML = `<div class="text-muted text-sm" style="text-align:center;padding:20px">${t.noTransfers}</div>`;
       return;
     }
 
@@ -684,7 +827,7 @@
     }catch(err){
       console.error('fetchLive error', err);
       statusDot.className='status-dot error';
-      statusText.textContent='ERREUR CONNEXION';
+      statusText.textContent=t.connectionError;
     }
     render();
   }
@@ -743,15 +886,15 @@
     const free=fs.free_bytes||0, total=fs.total_bytes||0;
     const pct=size>0?Math.min(size/(size+free),1)*100:0;
     localBar.style.width=`${clamp(pct,0,100)}%`;
-    localTxt.textContent=`${fmtBytes(free)} libres`;
-    localDisk.textContent=`Total disque: ${fmtBytes(total)}`;
+    localTxt.textContent=`${fmtBytes(free)} ${t.free}`;
+    localDisk.textContent=`${t.totalDisk}: ${fmtBytes(total)}`;
 
     // Last Run
     const lr=dynamicData.last_run||{};
     const kvs=[
-      ['Début', lr.start_at],
-      ['Fin', lr.end_at],
-      ['Exit Code', lr.exit_code]
+      [t.startTime, lr.start_at],
+      [t.endTime, lr.end_at],
+      [t.exitCode, lr.exit_code]
     ];
     lastRun.innerHTML=kvs.map(([k,v])=>`
       <div style="display:flex; justify-content:space-between; border-bottom:1px solid #334155; padding-bottom:4px;">
@@ -770,7 +913,7 @@
   let logsRawContent = '';
 
   function colorizeLogs(text) {
-    if (!text) return '<span class="log-info">(vide)</span>';
+    if (!text) return `<span class="log-info">${t.empty}</span>`;
     return text.split('\n').map(line => {
       let cls = 'log-line';
       if (line.includes('[ERROR]')) cls += ' log-error';
@@ -792,7 +935,7 @@
       const data = await res.json();
 
       const currentVal = logsDateEl.value;
-      logsDateEl.innerHTML = '<option value="today">Aujourd\'hui</option>';
+      logsDateEl.innerHTML = `<option value="today">${t.today}</option>`;
       (data.available_dates || []).forEach(d => {
         if (d !== new Date().toISOString().slice(0, 10)) {
           logsDateEl.innerHTML += `<option value="${d}">${d}</option>`;
@@ -800,7 +943,7 @@
       });
       logsDateEl.value = currentVal;
 
-      logsMetaEl.textContent = `${data.file || '–'} • ${data.total_lines} lignes • ${fmtBytes(data.size_bytes)}`;
+      logsMetaEl.textContent = `${data.file || '–'} • ${data.total_lines} ${t.lines} • ${fmtBytes(data.size_bytes)}`;
       logsRawContent = data.content || '';
 
       const wasAtBottom = (logsContentEl.scrollHeight - logsContentEl.scrollTop) <= (logsContentEl.clientHeight + 50);
@@ -856,7 +999,13 @@
     else { fetchLive(); fetchDynamicSnapshot(); fetchLogs(); startTimers(false); }
   });
 
+  // Language selector
+  const langSelect = document.getElementById('langSelect');
+  langSelect.value = lang;
+  langSelect.addEventListener('change', () => setLang(langSelect.value));
+
   // Init
+  applyTranslations();
   fetchLive();
   fetchStaticSnapshot();   // 1x au chargement
   fetchDynamicSnapshot();  // puis toutes les 30s

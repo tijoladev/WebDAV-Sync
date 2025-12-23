@@ -1,37 +1,43 @@
 # webdav-sync
 
-> **Projet personnel** — Ce logiciel est fourni tel quel, sans garantie. Assurez-vous de comprendre son fonctionnement avant de l'utiliser en production. Testez d'abord avec des données non critiques. Utilisation à vos risques.
+*[Version française](README.fr.md)*
 
-Synchronisation automatique de serveurs WebDAV vers un système de fichiers local, avec interface web de monitoring.
+> **Personal project** — This software is provided as-is, without warranty. Make sure you understand how it works before using it in production. Test with non-critical data first. Use at your own risk.
 
-## Services WebDAV Compatibles
+> **Note**: Unlike cloud sync clients that monitor file changes in real-time, webdav-sync performs scheduled synchronizations (via cron) or manual triggers. It's designed for periodic backups, not continuous bidirectional sync.
 
-| Service | Type | URL WebDAV |
+Lightweight Docker container for automatic WebDAV to local filesystem synchronization, with real-time web UI. Ideal for homelab, self-hosting and NAS backup. Works with kDrive, Nextcloud, ownCloud, Synology, QNAP, Seafile, pCloud, Box, Yandex Disk and any WebDAV server.
+
+![WebDAV-Sync Dashboard](WebDAV-Sync.png)
+
+## Compatible WebDAV Services
+
+| Service | Type | WebDAV URL |
 |---------|------|------------|
-| **Infomaniak kDrive** | Cloud Suisse | `https://XXXXXX.connect.kdrive.infomaniak.com/` |
-| **Nextcloud** | Auto-hébergé / Cloud | `https://cloud.example.com/remote.php/dav/files/USER/` |
-| **ownCloud** | Auto-hébergé / Cloud | `https://owncloud.example.com/remote.php/webdav/` |
+| **Infomaniak kDrive** | Swiss Cloud | `https://XXXXXX.connect.kdrive.infomaniak.com/` |
+| **Nextcloud** | Self-hosted / Cloud | `https://cloud.example.com/remote.php/dav/files/USER/` |
+| **ownCloud** | Self-hosted / Cloud | `https://owncloud.example.com/remote.php/webdav/` |
 | **Synology DSM** | NAS | `https://nas.example.com:5006/` |
 | **QNAP QTS** | NAS | `https://nas.example.com/share.cgi/webdav/` |
-| **Seafile** | Auto-hébergé | `https://seafile.example.com/seafdav/` |
+| **Seafile** | Self-hosted | `https://seafile.example.com/seafdav/` |
 | **Box** | Cloud | `https://dav.box.com/dav/` |
 | **pCloud** | Cloud | `https://webdav.pcloud.com/` |
 | **4shared** | Cloud | `https://webdav.4shared.com/` |
 | **Yandex Disk** | Cloud | `https://webdav.yandex.com/` |
 | **Koofr** | Cloud | `https://app.koofr.net/dav/Koofr/` |
 
-> Tout serveur compatible WebDAV fonctionne avec webdav-sync.
+> Any WebDAV-compatible server works with webdav-sync.
 
-## Fonctionnalités
+## Features
 
-- Synchronisation planifiée (cron) ou manuelle
-- Interface web temps réel (progression, vitesse, ETA)
-- Contrôles Start / Pause / Resume / Stop
-- Support Docker Secrets et Kubernetes
-- Gestion PUID/PGID pour NAS (Synology, Unraid, etc.)
-- Logs rotatifs avec consultation web
+- Scheduled (cron) or manual synchronization
+- Real-time web interface (progress, speed, ETA)
+- Start / Pause / Resume / Stop controls
+- Docker Secrets and Kubernetes support
+- PUID/PGID management for NAS (Synology, Unraid, etc.)
+- Rotating logs with web viewer
 
-## Démarrage Rapide
+## Quick Start
 
 ```bash
 docker run -d \
@@ -46,47 +52,47 @@ docker run -d \
   webdav-sync
 ```
 
-Accéder à l'interface : http://localhost:8080
+Access the interface: http://localhost:8080
 
-## Variables d'Environnement
+## Environment Variables
 
-### Connexion WebDAV (obligatoires)
+### WebDAV Connection (required)
 
 | Variable | Description |
 |----------|-------------|
-| `REMOTE_URL` | URL du serveur WebDAV |
-| `REMOTE_USER` | Nom d'utilisateur |
-| `REMOTE_PASS` | Mot de passe |
+| `REMOTE_URL` | WebDAV server URL |
+| `REMOTE_USER` | Username |
+| `REMOTE_PASS` | Password |
 
-### Synchronisation
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SYNC_OP` | `sync` | Opération : `sync`, `copy`, `move` |
-| `SYNC_FLAGS` | `--fast-list --delete-during` | Flags rclone additionnels |
-| `CRON_ENABLED` | `true` | Activer le mode planifié |
-| `CRON_SCHEDULE` | `0 5 * * *` | Expression cron (5h du matin) |
-
-### Système
+### Synchronization
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TZ` | `Europe/Paris` | Fuseau horaire |
-| `PUID` | `0` | User ID pour les fichiers |
-| `PGID` | `0` | Group ID pour les fichiers |
-| `LOG_LEVEL` | `INFO` | Niveau de log : DEBUG, INFO, NOTICE, ERROR |
-| `LOG_MAX_DAYS` | `5` | Rétention des logs (jours) |
+| `SYNC_OP` | `sync` | Operation: `sync`, `copy`, `move` |
+| `SYNC_FLAGS` | `--fast-list --delete-during` | Additional rclone flags |
+| `CRON_ENABLED` | `true` | Enable scheduled mode |
+| `CRON_SCHEDULE` | `0 5 * * *` | Cron expression (5 AM) |
 
-### Interface Web
+### System
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WEB_USER` | `admin` | Utilisateur HTTP Basic Auth |
-| `WEB_PASS` | *(vide)* | Mot de passe (vide = pas d'auth) |
+| `TZ` | `Europe/Paris` | Timezone |
+| `PUID` | `0` | User ID for files |
+| `PGID` | `0` | Group ID for files |
+| `LOG_LEVEL` | `INFO` | Log level: DEBUG, INFO, NOTICE, ERROR |
+| `LOG_MAX_DAYS` | `5` | Log retention (days) |
+
+### Web Interface
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEB_USER` | `admin` | HTTP Basic Auth username |
+| `WEB_PASS` | *(empty)* | Password (empty = no auth) |
 
 ## Docker Compose
 
-### Exemple avec kDrive (Infomaniak)
+### Example with kDrive (Infomaniak)
 
 ```yaml
 services:
@@ -98,7 +104,7 @@ services:
       - REMOTE_PASS=secret
       - TZ=Europe/Paris
       - CRON_SCHEDULE=0 5 * * *
-      - WEB_PASS=monsecret
+      - WEB_PASS=mysecret
     volumes:
       - ./data:/webdav-sync/local-files
       - ./logs:/webdav-sync/logs
@@ -106,7 +112,7 @@ services:
       - "8080:8080"
 ```
 
-### Exemple avec Nextcloud
+### Example with Nextcloud
 
 ```yaml
 services:
@@ -125,7 +131,7 @@ services:
       - "8080:8080"
 ```
 
-### Exemple avec Synology NAS
+### Example with Synology NAS
 
 ```yaml
 services:
@@ -147,14 +153,14 @@ services:
 
 ## Volumes
 
-| Chemin | Description |
-|--------|-------------|
-| `/webdav-sync/local-files` | Fichiers synchronisés |
-| `/webdav-sync/logs` | Logs rotatifs |
+| Path | Description |
+|------|-------------|
+| `/webdav-sync/local-files` | Synchronized files |
+| `/webdav-sync/logs` | Rotating logs |
 
-## Secrets Docker
+## Docker Secrets
 
-Les variables sensibles peuvent être passées via Docker Secrets :
+Sensitive variables can be passed via Docker Secrets:
 
 ```yaml
 services:
@@ -164,49 +170,52 @@ services:
     environment:
       - REMOTE_URL=https://cloud.example.com/
       - REMOTE_USER=user
-      # REMOTE_PASS lu depuis /run/secrets/remote_pass
+      # REMOTE_PASS read from /run/secrets/remote_pass
 
 secrets:
   remote_pass:
     file: ./secrets/remote_pass.txt
 ```
 
-Ordre de résolution :
+Resolution order:
 1. `/run/secrets/VAR` (Docker Secrets)
-2. `VAR_FILE` pointant vers un fichier
-3. Variable d'environnement `VAR`
+2. `VAR_FILE` pointing to a file
+3. Environment variable `VAR`
 
-## Interface Web
+## Web Interface
 
-L'interface accessible sur le port 8080 affiche :
+The interface accessible on port 8080 displays:
 
-- **Status** : idle (orange), active (vert), paused (bleu), error (rouge)
-- **Progression** : barre globale + transferts en cours
-- **Stockage** : espace disque local et distant
-- **Logs** : consultation avec sélecteur de date
+- **Status**: idle (orange), active (green), paused (blue), error (red)
+- **Progress**: global bar + current transfers
+- **Storage**: local and remote disk space
+- **Logs**: viewer with date selector
 
-### Contrôles
+### Controls
 
-| Bouton | Action |
+| Button | Action |
 |--------|--------|
-| Start | Lance une synchronisation |
-| Pause | Suspend le transfert (SIGSTOP) |
-| Resume | Reprend le transfert (SIGCONT) |
-| Stop | Arrête la synchronisation |
+| Start | Starts a synchronization |
+| Pause | Suspends the transfer (SIGSTOP) |
+| Resume | Resumes the transfer (SIGCONT) |
+| Stop | Stops the synchronization |
 
-## Stack Technique
+## Security
 
-- **Base** : Alpine Linux + rclone 1.71.2
-- **Web** : BusyBox httpd + CGI
-- **Frontend** : HTML5/CSS3/JS vanilla (pas de framework)
-- **Planification** : crond
-- **~1800 lignes** de code total
+The built-in authentication (HTTP Basic Auth) provides minimal protection. For production use or internet exposure, it is recommended to place webdav-sync behind a reverse proxy (Traefik, Caddy, nginx) with HTTPS.
+
+## Tech Stack
+
+- **Base**: Alpine Linux + rclone 1.71.2
+- **Web**: BusyBox httpd + CGI
+- **Frontend**: HTML5/CSS3/JS vanilla (no framework)
+- **Scheduling**: crond
+- **~1800 lines** of code total
 
 ## Documentation
 
-- [Documentation Technique](docs/TECHNICAL.md)
-- [Objectifs du Projet](docs/OBJECTIVES.md)
+- [Technical Documentation](TECHNICAL.md)
 
-## Licence
+## License
 
 MIT
